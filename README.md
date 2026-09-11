@@ -5,6 +5,10 @@ My personal [pi](https://github.com/earendil-works/pi) configuration.
 > Inspired by [amosblomqvist/pi-config](https://github.com/amosblomqvist/pi-config).
 > This repo is **not** meant to be cloned over `~/.pi/agent` directly.
 > Copy the pieces you want, or use the install script.
+>
+> 🔒 Secret scanning + push protection are enabled on this repo.
+> Real keys live only in local `~/.pi/agent/` and are never committed —
+> see [Secrets policy](#secrets-policy).
 
 ## Layout
 
@@ -57,17 +61,25 @@ cp web-search.json.example ~/.pi/web-search.json
 
 ### Extensions
 
-- `ask-user-question.ts` — interactive question popup
-- `bash-guard/` — dangerous-command guardrail
-- `browser/` — Playwright headless Chromium for frontend debugging
-- `command-v-image-paste.ts` — macOS/Ghostty image paste optimization
-- `herdr-agent-state.ts` — Herdr terminal state reporting
-- `otty-integration.ts` — Otty status badge / completion notice
-- `web-fetch/` — URL to clean markdown (+PDF)
+Mostly from upstream, plus three homegrown ones (marked 🌟):
+
+- `ask-user-question.ts` — interactive question popup (single/multi-select, rich layout)
+- `bash-guard/` — hooks that intercept risky bash commands (`rm`/`sudo`/`curl|sh`/`git reset --hard`…) with a Run/Abort prompt; strict for subagents
+- `browser/` — Playwright headless Chromium the agent can drive (goto/eval/console/network/click/screenshot); for real frontend debugging instead of guessing from source
+- `command-v-image-paste.ts` 🌟 — macOS/Ghostty `Cmd+V` image paste: compresses clipboard PNGs via `sips` (long edge 1600px, ~150–250KB) so big screenshots don't freeze the editor
+- `herdr-agent-state.ts` 🌟 — reports agent lifecycle over a Unix socket when running inside Herdr terminal (`HERDR_ENV`/`HERDR_SOCKET_PATH`/`HERDR_PANE_ID`)
+- `otty-integration.ts` 🌟 — reports idle/processing state + task-complete badge to Otty terminal via `otty-cli` IPC socket
+- `web-fetch/` — fetch a URL and get clean markdown (Readability + Turndown, PDF support, Jina fallback)
 
 ### Skills
 
-- `analyze-sessions/` — cost/prompt/session mining over past sessions
-- `pdf-reader/` — PDF text + visual reading
-- `web-debug/` — frontend runtime debugging playbook
-- `youtube-transcript/` — YouTube title + transcript as JSON
+Same four as upstream (kept because they earn their place):
+
+- `analyze-sessions/` — Python scripts to query past pi sessions: cost rollups by day/project/model, prompt-pattern mining, full-text search, single-session rendering
+- `pdf-reader/` — read PDFs (papers, lecture notes) with text extraction + page rendering for formulas/diagrams
+- `web-debug/` — playbook: always debug frontend issues with real `browser_*` tools (auth/401/CORS/JWT/blank screen…) before reading source
+- `youtube-transcript/` — fetch a YouTube video's title + transcript as JSON (via `yt-dlp`)
+
+### Model routing (`models.json.example`)
+
+Two OpenAI-compatible providers (`DDDD`, `anyrouter`) with `gpt-5.6-luna/sol`, `grok-4.6`, `muse-spark`, `gpt-6-astra`, `gemini-3.8-flash-high`. Web search defaults to Tavily with Exa fallback.
