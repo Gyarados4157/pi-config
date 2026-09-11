@@ -23,7 +23,8 @@
         "id": "gpt-5.6-luna",
         "thinking": "medium"
       }
-    }
+    },
+    "compactAtContextTokens": 200000
   },
   "skills": [
     "!lark-*"
