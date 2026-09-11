@@ -1,0 +1,31 @@
+{
+  "lastChangelogVersion": "0.85.1",
+  "theme": "dark",
+  "defaultProjectTrust": "always",
+  "packages": [
+    "/Users/zhangxuanyang/.pi/agent/packages/pi-interactive-subagents",
+    "https://github.com/amosblomqvist/pi-observational-memory",
+    "https://github.com/amosblomqvist/pi-dictate",
+    "npm:pi-web-access",
+    "npm:pi-one-ui",
+    "npm:@fradser/pi-btw",
+    "npm:pi-mcp-adapter"
+  ],
+  "observational-memory": {
+    "models": {
+      "observer": {
+        "provider": "DDDD",
+        "id": "gpt-5.6-luna",
+        "thinking": "low"
+      },
+      "consolidator": {
+        "provider": "DDDD",
+        "id": "gpt-5.6-luna",
+        "thinking": "medium"
+      }
+    }
+  },
+  "skills": [
+    "!lark-*"
+  ]
+}

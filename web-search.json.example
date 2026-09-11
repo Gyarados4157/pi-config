@@ -1,0 +1,18 @@
+{
+  "tavilyApiKey": "YOUR_SECRET_HERE",
+  "searchRouting": {
+    "providers": [
+      "YOUR_SECRET_HERE",
+      "exa"
+    ],
+    "fallbackOn": [
+      "transient",
+      "quota",
+      "network",
+      "invalid-response"
+    ]
+  },
+  "provider": "YOUR_SECRET_HERE",
+  "workflow": "none",
+  "autoOpenBrowser": false
+}
