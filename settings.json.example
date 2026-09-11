@@ -3,7 +3,7 @@
   "theme": "dark",
   "defaultProjectTrust": "always",
   "packages": [
-    "/Users/zhangxuanyang/.pi/agent/packages/pi-interactive-subagents",
+    "$HOME/.pi/agent/packages/pi-interactive-subagents",
     "https://github.com/amosblomqvist/pi-observational-memory",
     "https://github.com/amosblomqvist/pi-dictate",
     "npm:pi-web-access",
