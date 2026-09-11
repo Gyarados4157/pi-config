@@ -24,7 +24,7 @@
             "image"
           ],
           "contextWindow": 256000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "off": "none",
             "minimal": "minimal",
@@ -50,7 +50,7 @@
             "image"
           ],
           "contextWindow": 256000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "off": "none",
             "minimal": "minimal",
@@ -76,7 +76,7 @@
             "image"
           ],
           "contextWindow": 500000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "off": "none",
             "minimal": "minimal",
@@ -102,7 +102,7 @@
             "image"
           ],
           "contextWindow": 1000000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "xhigh": "xhigh",
             "high": "high",
@@ -126,7 +126,7 @@
             "image"
           ],
           "contextWindow": 1000000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "xhigh": "xhigh",
             "high": "high",
@@ -150,7 +150,7 @@
             "image"
           ],
           "contextWindow": 1000000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "high": "high",
             "xhigh": "xhigh",
@@ -174,7 +174,7 @@
             "image"
           ],
           "contextWindow": 1000000,
-          "maxTokens": "YOUR_SECRET_HERE"
+          "maxTokens": 128000
         }
       ]
     },
@@ -192,7 +192,7 @@
             "image"
           ],
           "contextWindow": 1000000,
-          "maxTokens": "YOUR_SECRET_HERE",
+          "maxTokens": 128000,
           "thinkingLevelMap": {
             "low": "low",
             "medium": "medium",
