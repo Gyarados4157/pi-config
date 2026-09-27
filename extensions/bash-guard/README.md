@@ -13,13 +13,15 @@ which pi-subagents injects into every spawned process.
 - Heuristically detects destructive/questionable commands via shell-aware parsing
 - **Prompts only for HIGH severity.** MEDIUM is auto-allowed (git commit/push, `sed -i`,
   workspace file redirects, etc.).
-- HIGH includes: `rm`/`rmdir`/`unlink`, `sudo`, `find -delete`, `dd`, `mkfs*`/`wipefs`/
-  `diskutil`/`parted`/`fdisk`, `shutdown`/`reboot`, `curl|sh`, `kubectl delete`,
-  `terraform destroy`, `git rm` / `git reset --hard` / `git clean -f` / `git push --force`.
+- HIGH includes: recursive `rm` outside scratch (`/tmp`, `node_modules`, `dist`, …),
+  `sudo`, `find -delete`, `dd of=`, `mkfs*`/`wipefs`/`diskutil erase*`/`parted`/`fdisk`,
+  `shutdown`/`reboot`, `curl|sh`, `kubectl delete`, `terraform destroy`,
+  `git reset --hard` / `git clean -f` / `git push --force`.
   Read-only git (`status`/`diff`/`log`/`show`/`grep`) is not flagged.
-  Routine pipes (`grep | head`), `/dev/null` and `/tmp` sinks, fd dups (`2>&1`), and
-  operators inside heredoc bodies (e.g. Python `if 1 > 0:`) are not flagged.
-- Shows a 2-option dialog: **Run** / **Abort**
+  Single-file `rm`, `rm -rf /tmp/…`, `curl | head`, `diskutil list`, routine pipes
+  (`grep | head`), `/dev/null` sinks, fd dups (`2>&1`), and operators inside heredoc
+  bodies (e.g. Python `if 1 > 0:`) are not flagged.
+- Shows a 2-option dialog: **Run** / **Abort**. In Herdr the pane is marked `blocked` so the sidebar / toast can jump back here.
 - If aborted, the tool call is blocked and the model receives a clear reason
 - Remembers recently aborted commands for 60 s to prevent retry loops
 

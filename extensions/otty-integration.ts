@@ -19,6 +19,8 @@ import { homedir } from "node:os";
 import { basename, join } from "node:path";
 
 const OTTY_CLI = "/Applications/Otty.app/Contents/MacOS/otty-cli";
+// Otty substitutes the real socket path per install; derive it instead of
+// hardcoding a username so this copy works for any user.
 const OTTY_SOCKET = join(homedir(), "Library/Application Support/io.appmakes.otty/otty.sock");
 const OTTY_AGENT = "pi"; // "pi" | "omp"
 

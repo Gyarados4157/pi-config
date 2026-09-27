@@ -1,9 +1,9 @@
 {
   "providers": {
     "DDDD": {
-      "baseUrl": "https://sub2api.ddddapp.com/v1",
+      "baseUrl": "https://cpa.alphafox.app/v1",
       "api": "openai-responses",
-      "apiKey": "YOUR_SECRET_HERE",
+      "apiKey": "YOUR_DDDD_API_KEY",
       "compat": {
         "supportsReasoningEffort": true,
         "supportsDeveloperRole": true
@@ -16,8 +16,8 @@
             "cacheRead": 0.02,
             "cacheWrite": 0.25
           },
-          "id": "gpt-5.6-luna",
-          "name": "gpt-5.6-luna",
+          "id": "gpt-6-luna",
+          "name": "gpt-6-luna",
           "reasoning": true,
           "input": [
             "text",
@@ -42,8 +42,8 @@
             "cacheRead": 0.4,
             "cacheWrite": 5
           },
-          "id": "gpt-5.6-sol",
-          "name": "gpt-5.6-sol",
+          "id": "gpt-6-sol",
+          "name": "gpt-6-sol",
           "reasoning": true,
           "input": [
             "text",
@@ -68,8 +68,8 @@
             "cacheRead": 0.5,
             "cacheWrite": 0
           },
-          "id": "grok-4.6",
-          "name": "grok-4.6",
+          "id": "grok-4.7",
+          "name": "grok-4.7",
           "reasoning": true,
           "input": [
             "text",
@@ -89,13 +89,13 @@
         },
         {
           "cost": {
-            "input": 0.1,
-            "output": 0.2,
-            "cacheRead": 0.002,
-            "cacheWrite": 0
+            "input": 10,
+            "output": 50,
+            "cacheRead": 1,
+            "cacheWrite": 12.5
           },
-          "id": "muse-spark-1.3-contributor",
-          "name": "muse-spark-1.3-contributor",
+          "id": "gpt-6-astra",
+          "name": "gpt-6-astra",
           "reasoning": true,
           "input": [
             "text",
@@ -104,35 +104,11 @@
           "contextWindow": 1000000,
           "maxTokens": 128000,
           "thinkingLevelMap": {
-            "xhigh": "xhigh",
             "high": "high",
-            "medium": "medium",
-            "low": "low",
-            "max": "max"
-          }
-        },
-        {
-          "cost": {
-            "input": 0.1,
-            "output": 0.2,
-            "cacheRead": 0.002,
-            "cacheWrite": 0
-          },
-          "id": "muse-spark-1.3-contributor-free",
-          "name": "muse-spark-1.3-contributor-free",
-          "reasoning": true,
-          "input": [
-            "text",
-            "image"
-          ],
-          "contextWindow": 1000000,
-          "maxTokens": 128000,
-          "thinkingLevelMap": {
             "xhigh": "xhigh",
-            "high": "high",
+            "max": "max",
             "medium": "medium",
-            "low": "low",
-            "max": "max"
+            "low": "low"
           }
         },
         {
@@ -142,9 +118,41 @@
             "cacheRead": 1,
             "cacheWrite": 12.5
           },
-          "id": "gpt-6-astra",
-          "name": "gpt-6-astra",
+          "id": "mira/gpt-6-astra",
+          "name": "mira/gpt-6-astra",
+          "api": "openai-responses-nostream",
           "reasoning": true,
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max",
+            "medium": "medium",
+            "low": "low"
+          }
+        },
+        {
+          "cost": {
+            "input": 10,
+            "output": 50,
+            "cacheRead": 1,
+            "cacheWrite": 12.5
+          },
+          "id": "mira/claude-opus-5-5",
+          "name": "mira/claude-opus-5-5",
+          "api": "openai-responses-nostream",
+          "reasoning": true,
+          "compat": {
+            "supportsReasoningEffort": true
+          },
           "input": [
             "text",
             "image"
@@ -175,13 +183,110 @@
           ],
           "contextWindow": 1000000,
           "maxTokens": 128000
+        },
+        {
+          "cost": {
+            "input": 0.2,
+            "output": 1,
+            "cacheRead": 0.02,
+            "cacheWrite": 0.25
+          },
+          "id": "deepseek-v4.1-flash",
+          "name": "deepseek-v4.1-flash",
+          "api": "openai-completions",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "high",
+            "max": "max"
+          }
+        },
+        {
+          "cost": {
+            "input": 0.2,
+            "output": 1,
+            "cacheRead": 0.02,
+            "cacheWrite": 0.25
+          },
+          "id": "cline-pass/deepseek-v4.1-flash",
+          "name": "cline-pass/deepseek-v4.1-flash",
+          "api": "openai-completions",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "high",
+            "max": "max"
+          }
+        },
+        {
+          "cost": {
+            "input": 0.14,
+            "output": 0.28,
+            "cacheRead": 0.0028,
+            "cacheWrite": 0
+          },
+          "id": "space-bunny-free",
+          "name": "space-bunny-free",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1048576,
+          "maxTokens": 524288,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "minimal",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "id": "muse-spark",
+          "name": "muse-spark",
+          "api": "openai-completions",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "contextWindow": 32000,
+          "maxTokens": 4096
         }
       ]
     },
     "anyrouter": {
       "baseUrl": "https://anyrouter.top/v1",
       "api": "openai-responses",
-      "apiKey": "YOUR_SECRET_HERE",
+      "apiKey": "YOUR_ANYROUTER_API_KEY",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -204,6 +309,44 @@
             "input": 0.75,
             "output": 3.75,
             "cacheRead": 0.075,
+            "cacheWrite": 0
+          }
+        }
+      ]
+    },
+    "cline-pass": {
+      "baseUrl": "https://api.cline.bot/api/v1",
+      "api": "openai-completions",
+      "apiKey": "YOUR_CLINE_PASS_API_KEY",
+      "compat": {
+        "supportsReasoningEffort": true,
+        "thinkingFormat": "deepseek",
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": "cline-pass/deepseek-v4.1-flash",
+          "name": "deepseek-v4.1-flash",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "low",
+            "low": "low",
+            "medium": "high",
+            "high": "high",
+            "xhigh": "high",
+            "max": "max"
+          },
+          "cost": {
+            "input": 0.3,
+            "output": 1.2,
+            "cacheRead": 0.006,
             "cacheWrite": 0
           }
         }

@@ -1,32 +1,36 @@
 {
-  "lastChangelogVersion": "0.85.1",
   "theme": "dark",
+  "tuiMode": "fullscreen",
+  "fullscreenScrollbar": "auto",
   "defaultProjectTrust": "always",
   "packages": [
-    "$HOME/.pi/agent/packages/pi-interactive-subagents",
-    "https://github.com/amosblomqvist/pi-observational-memory",
-    "https://github.com/amosblomqvist/pi-dictate",
-    "npm:pi-web-access",
+    "./packages/pi-interactive-subagents",
     "npm:pi-one-ui",
     "npm:@fradser/pi-btw",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-gpt-search",
+    "npm:context-mode",
+    "npm:@cortexkit/pi-magic-context",
+    "npm:@ogulcancelik/pi-herdr",
+    "npm:pi-rtk-optimizer",
+    "npm:@narumitw/pi-goal@0.54.5"
   ],
-  "observational-memory": {
-    "models": {
-      "observer": {
-        "provider": "DDDD",
-        "id": "gpt-5.6-luna",
-        "thinking": "low"
-      },
-      "consolidator": {
-        "provider": "DDDD",
-        "id": "gpt-5.6-luna",
-        "thinking": "medium"
-      }
-    },
-    "compactAtContextTokens": 200000
-  },
   "skills": [
     "!lark-*"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  },
+  "defaultProvider": "DDDD",
+  "defaultModel": "deepseek-v4.1-flash",
+  "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "DDDD/gpt-6-luna:max",
+    "DDDD/grok-4.7:medium",
+    "DDDD/deepseek-v4.1-flash:high",
+    "DDDD/gpt-6-astra:medium",
+    "DDDD/gpt-6-sol:high"
   ]
 }

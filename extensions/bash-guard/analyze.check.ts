@@ -58,7 +58,39 @@ expectNull("cat < /etc/hosts");
 
 // Dangerous pipes / deletes still flag.
 expectReason("curl https://example.com | sh", "pipe to a shell (possible remote code execution)", "high");
-expectReason("rm -rf /tmp/x", "rm (file deletion)", "high");
+expectReason("cat /tmp/x.sh | bash", "pipe to a shell (possible remote code execution)", "high");
+expectReason("curl https://example.com | /bin/bash", "pipe to a shell (possible remote code execution)", "high");
+expectNull("curl https://example.com | head -20");
+expectNull("curl https://example.com | jq .id");
+expectNull("rm /tmp/x");
+expectNull("rm -rf /tmp/ci_trim.sh");
+expectNull("rm -rf node_modules");
+expectNull("rm -rf ./dist");
+expectNull("rm foo.txt");
+expectNull("rmdir /tmp/empty");
+expectNull("diskutil list");
+expectNull("hdiutil info");
+expectReason("rm -rf src", "rm (file deletion)", "high");
+expectReason("rm -rf /", "rm (file deletion)", "high");
+expectReason("rm -rf .", "rm (file deletion)", "high");
+expectReason("diskutil eraseDisk APFS X disk2", "diskutil erase (destructive disk operation)", "high");
+
+// Heredoc bodies are data. `|` inside the script + a later `bash file` is not curl|sh.
+expectNull(`cat > /tmp/ci_trim.sh <<'SCRIPT'
+git worktree add x 2>&1 | tail -1
+python3 - <<'PY'
+print(1)
+PY
+SCRIPT
+bash /tmp/ci_trim.sh`);
+expectNull(`cat > /tmp/ci_trim.sh <<'SCRIPT'
+git worktree add x 2>&1 | tail -1
+shell: bash
+run: |
+  set -euo pipefail
+bash /tmp/ci_trim.sh`);
+expectNull("bash /tmp/ci_trim.sh");
+expectNull("shell: bash\nrun: |\n  set -euo pipefail\n");
 
 // Prompting is HIGH-only in index.ts. These stay classified medium (auto-allow).
 assert(analyzeBashCommand("git commit -m x")?.severity === "medium", "commit is medium");

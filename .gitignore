@@ -12,18 +12,24 @@ config.json
 .pi/
 sessions/
 git/
+scratch/
+dev-checks/
+web-search-cache/
 mcp-cache.json
 mcp-npx-cache.json
 run-history.jsonl
 session-manager-config.toml
 pi-crash.log
 *.log
+*.bak.*
 
 # Dependencies / generated environments
 node_modules/
 **/node_modules/
 .venv/
 **/.venv/
+.memory/
+**/.memory/
 
 # Python junk
 __pycache__/

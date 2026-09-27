@@ -4,8 +4,23 @@ import type { SelectItem } from "@mariozechner/pi-tui";
 import { Container, SelectList, Text } from "@mariozechner/pi-tui";
 import { analyzeBashCommand, type Risk } from "./analyze.ts";
 
-async function promptRunOrAbort(ctx: any, command: string, risk: Risk): Promise<"run" | "abort"> {
+function setHerdrBlocked(pi: ExtensionAPI, active: boolean, label?: string): void {
+	try {
+		pi.events.emit("herdr:blocked", { active, label });
+	} catch {
+		// ignore
+	}
+}
+
+async function promptRunOrAbort(
+	pi: ExtensionAPI,
+	ctx: any,
+	command: string,
+	risk: Risk,
+): Promise<"run" | "abort"> {
 	if (!ctx.hasUI) return "abort";
+
+	setHerdrBlocked(pi, true, "bash-guard: needs confirmation");
 
 	const reasonsText = risk.reasons.map((r) => `• ${r}`).join("\n");
 	const header = `Command flagged as ${risk.severity.toUpperCase()} risk:`;
@@ -16,7 +31,8 @@ async function promptRunOrAbort(ctx: any, command: string, risk: Risk): Promise<
 		{ value: "abort", label: "Abort", description: "Block this command" },
 	];
 
-	const choice = await ctx.ui.custom<"run" | "abort">((tui, theme, _kb, done) => {
+	try {
+		const choice = await ctx.ui.custom<"run" | "abort">((tui, theme, _kb, done) => {
 		const container = new Container();
 		container.addChild(new DynamicBorder((s: string) => theme.fg("warning", s)));
 		container.addChild(new Text(theme.fg("warning", theme.bold("Potentially destructive bash command")), 1, 0));
@@ -46,14 +62,19 @@ async function promptRunOrAbort(ctx: any, command: string, risk: Risk): Promise<
 		};
 	}, { overlay: true });
 
-	return choice ?? "abort";
+		return choice ?? "abort";
+	} finally {
+		setHerdrBlocked(pi, false);
+	}
 }
 
 // PI_SUBAGENT_DEPTH is 0 (or unset) in the main session and >= 1 in spawned subagent processes.
 // Behaviour branches on this: interactive prompting in the main session, headless hard-block
 // for catastrophic operations in subagents (where stdin is /dev/null and no UI is available).
 const _subagentDepth = Number(process.env.PI_SUBAGENT_DEPTH ?? "0");
-const _isSubagent = Number.isFinite(_subagentDepth) && _subagentDepth >= 1;
+const _isSubagent =
+	(Number.isFinite(_subagentDepth) && _subagentDepth >= 1) ||
+	Boolean(process.env.PI_SUBAGENT_ID && process.env.PI_SUBAGENT_SESSION);
 
 // Hard-block patterns for subagent (headless) mode. Criteria: unrecoverable by default AND
 // unlikely to be intentional in an automated context. Fewer false positives over broad coverage —
@@ -235,7 +256,7 @@ export default function (pi: ExtensionAPI) {
 			return;
 		}
 
-		const choice = await promptRunOrAbort(ctx, command, risk);
+		const choice = await promptRunOrAbort(pi, ctx, command, risk);
 		if (choice === "run") return;
 
 		recentlyAborted.set(command, now);

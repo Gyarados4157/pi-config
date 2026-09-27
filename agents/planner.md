@@ -2,7 +2,7 @@
 name: planner
 description: Creates implementation plans from context and requirements
 tools: read, grep, find, ls
-model: DDDD/gpt-5.6-sol
+model: DDDD/gpt-6-sol
 thinking: medium
 system-prompt: append
 auto-exit: true

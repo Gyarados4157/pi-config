@@ -56,13 +56,77 @@ function isBenignRedirectTarget(target: string | undefined): boolean {
 	return false;
 }
 
+const SCRATCH_DIR_NAMES = new Set([
+	"node_modules",
+	"dist",
+	"build",
+	"target",
+	"coverage",
+	"__pycache__",
+	".next",
+	".turbo",
+	".cache",
+	".pytest_cache",
+	"htmlcov",
+	"tmp",
+	"temp",
+	".venv",
+	"venv",
+]);
+
+function isScratchPath(target: string): boolean {
+	if (target === "/tmp" || target.startsWith("/tmp/")) return true;
+	if (target === "/var/tmp" || target.startsWith("/var/tmp/")) return true;
+	const norm = target.replace(/\/+$/, "");
+	const parts = norm.split("/").filter(Boolean);
+	if (parts.some((p) => SCRATCH_DIR_NAMES.has(p))) return true;
+	return false;
+}
+
+function isRootishRmTarget(target: string): boolean {
+	const t = target.replace(/\/+$/, "") || "/";
+	if (t === "/" || t === "~" || t === "$HOME" || t === "." || t === "..") return true;
+	if (t === "/Users" || t === "/home" || t === "/Applications" || t === "/System" || t === "/Library") {
+		return true;
+	}
+	return false;
+}
+
+function hasClusteredFlag(args: string[], letter: string): boolean {
+	return args.some((a) => {
+		if (a === `-${letter}` || a === `-${letter.toUpperCase()}`) return true;
+		if (a.startsWith("-") && !a.startsWith("--") && a.includes(letter)) return true;
+		return false;
+	});
+}
+
+function rmTargets(rest: string[]): string[] {
+	return rest.filter((a) => a !== "--" && !a.startsWith("-"));
+}
+
+const SHELL_NAMES = new Set(["sh", "bash", "zsh", "fish", "dash"]);
+
+function isShellCommand(cmd: string | undefined): boolean {
+	if (!cmd) return false;
+	const base = cmd.split("/").pop() ?? cmd;
+	return SHELL_NAMES.has(base);
+}
+
 function stripHeredocBodies(command: string): string {
 	// shell-quote does not treat heredoc bodies as data, so `if 1 > 0:` inside
 	// `python3 <<'PY'` is parsed as a file redirect. Drop the body first.
-	return command.replace(
-		/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?^\2\s*$/gm,
-		(full) => full.split("\n", 1)[0] ?? full,
-	);
+	// Nested heredocs (outer SCRIPT wrapping inner PY): strip until stable.
+	// Allow indented terminators. Unclosed bodies are dropped so YAML `run: |`
+	// and a later `bash file.sh` cannot be parsed as one giant pipeline.
+	const dropBody = (full: string) => full.split("\n", 1)[0] ?? full;
+	const closed =
+		/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?^\s*\2\s*$/gm;
+	let prev = "";
+	while (command !== prev) {
+		prev = command;
+		command = command.replace(closed, dropBody);
+	}
+	return command.replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*$/m, dropBody);
 }
 
 function gitSubcommand(rest: string[]): { sub: string | undefined; subArgs: string[] } {
@@ -105,10 +169,19 @@ function analyzeSegment(seg: Token[]): Risk | null {
 	const cmd = args[0];
 	const rest = args.slice(1);
 
-	// Dangerous pipes (curl|sh, pipe-to-shell) stay per-segment. Generic `|` is not flagged.
-	if (ops.includes("|") && (args.includes("sh") || args.includes("bash") || args.includes("zsh") || args.includes("fish"))) {
-		reasons.push("pipe to a shell (possible remote code execution)");
-		severity = "high";
+	// Pipe-to-shell: only when a pipeline stage's argv[0] is a shell.
+	// Same-segment `|` plus a later `bash file.sh` (newlines are whitespace to
+	// shell-quote) must not count — that is the heredoc false positive.
+	const pipeStages = splitOnOps(seg, ["|", "|&"]);
+	if (pipeStages.length >= 2) {
+		for (const stage of pipeStages.slice(1)) {
+			const stageCmd = tokensToStrings(stage)[0];
+			if (isShellCommand(stageCmd)) {
+				reasons.push("pipe to a shell (possible remote code execution)");
+				severity = "high";
+				break;
+			}
+		}
 	}
 
 	// sudo
@@ -117,13 +190,21 @@ function analyzeSegment(seg: Token[]): Risk | null {
 		severity = "high";
 	}
 
-	// rm/rmdir/unlink
+	// rm/rmdir/unlink: prompt only for unrecoverable bulk delete.
+	// Single-file rm and /tmp or build-artifact trees are routine agent work.
 	if (cmd === "rm" || cmd === "rmdir" || cmd === "unlink") {
-		severity = "high";
-		reasons.push(`${cmd} (file deletion)`);
-		if (rest.some((a) => a.includes("-r") || a.includes("-R"))) reasons.push("recursive delete (-r/-R)");
-		if (rest.some((a) => a.includes("-f"))) reasons.push("forced delete (-f)");
-		if (ops.includes("glob")) reasons.push("glob pattern expansion (may delete many files)");
+		const targets = rmTargets(rest);
+		const recursive = cmd === "rm" && (hasClusteredFlag(rest, "r") || hasClusteredFlag(rest, "R") || rest.includes("--recursive"));
+		const glob = ops.includes("glob");
+		const allScratch = targets.length > 0 && targets.every(isScratchPath);
+		const anyRootish = targets.some(isRootishRmTarget);
+		if (anyRootish || ((recursive || glob) && !allScratch)) {
+			severity = "high";
+			reasons.push(`${cmd} (file deletion)`);
+			if (recursive) reasons.push("recursive delete (-r/-R)");
+			if (hasClusteredFlag(rest, "f") || rest.includes("--force")) reasons.push("forced delete (-f)");
+			if (glob) reasons.push("glob pattern expansion (may delete many files)");
+		}
 	}
 
 	// find -delete
@@ -137,7 +218,7 @@ function analyzeSegment(seg: Token[]): Risk | null {
 		const { sub, subArgs } = gitSubcommand(rest);
 
 		if (sub === "rm") {
-			severity = "high";
+			severity = severity === "high" ? "high" : "medium";
 			reasons.push("git rm (deletes files from working tree and stages deletions)");
 		}
 		if (sub === "clean" && (subArgs.some((a) => a.includes("-f")) || subArgs.includes("-d") || subArgs.includes("-x"))) {
@@ -216,15 +297,17 @@ function analyzeSegment(seg: Token[]): Risk | null {
 		reasons.push("wipefs (disk signature wipe)");
 	}
 	if (cmd === "diskutil") {
-		severity = "high";
-		reasons.push("diskutil (disk management command)");
-		if (rest.includes("eraseDisk") || rest.includes("eraseVolume")) {
+		const destructive = rest.some((a) =>
+			["eraseDisk", "eraseVolume", "zeroDisk", "secureErase", "reformat", "partitionDisk"].includes(a),
+		);
+		if (destructive) {
+			severity = "high";
 			reasons.push("diskutil erase (destructive disk operation)");
 		}
 	}
-	if (cmd === "hdiutil") {
+	if (cmd === "hdiutil" && rest[0] === "burn") {
 		severity = "high";
-		reasons.push("hdiutil (disk image management command)");
+		reasons.push("hdiutil burn (destructive disk operation)");
 	}
 	if (cmd === "gpt") {
 		severity = "high";
@@ -304,11 +387,8 @@ function analyzeSegment(seg: Token[]): Risk | null {
 		reasons.push("systemctl stop/disable (service disruption)");
 	}
 
-	// Remote execution patterns
-	if ((cmd === "curl" || cmd === "wget") && ops.includes("|")) {
-		severity = "high";
-		reasons.push("curl/wget piped (possible remote code execution)");
-	}
+	// curl|sh / wget|bash is already covered by the pipe-to-shell stage check.
+	// `curl | head` / `curl | jq` must not prompt.
 
 	// Infra deletes
 	if (cmd === "kubectl" && rest[0] === "delete") {
