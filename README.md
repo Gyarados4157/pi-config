@@ -54,7 +54,7 @@ $EDITOR ~/.pi/web-search.json          # tavilyApiKey（或只用 exa）
 | `python3` | `analyze-sessions` / `huashu-flash` / `pdf-reader` 脚本 | 系统 3.9.6 即可；`pdf-reader` 另需 `pip install -r skills/pdf-reader/requirements.txt`（PyMuPDF） |
 | `yt-dlp` | `youtube-transcript` 技能 | 本机 2026.03.03 |
 | `rtk` | `pi-rtk-optimizer` 的命令改写 | 本机 rtk 0.42.4；缺了会自动跳过 |
-| Otty / Orca | 对应终端集成扩展 | 没装这些终端的话，那几个扩展是无害的空转 |
+| Otty | `otty-integration.ts` | 没装 Otty 的话那个扩展是无害的空转 |
 
 ---
 
@@ -122,9 +122,6 @@ pi-config/
 | `edit-recovery/index.ts` 🌟 | edit 失败时补一条针对性提示（match 失败/重叠/无改动…），避免重放旧 `oldText` | 与 `~/.pi/agent/AGENTS.md` 的 edit 规则配套 |
 | `herdr-agent-state.ts` | 在 Herdr 里通过 unix socket 上报 agent 生命周期 | **Herdr 托管**，重装 Herdr 会覆盖 |
 | `magic-context-model-sync/index.ts` 🌟 | 把 pi 的模型清单同步进 `~/.config/cortexkit/magic-context.jsonc`（带备份） | |
-| `orca-agent-status.ts` | Orca 终端状态回传 | **Orca 托管** |
-| `orca-prefill.ts` | Orca 预填 | **Orca 托管** |
-| `orca-titlebar-spinner.ts` | Orca 标题栏转圈 | **Orca 托管** |
 | `otty-integration.ts` | 向 Otty 上报 processing/idle 与完成通知 | **Otty 托管**；本仓库版本把用户名硬编码改成了 `homedir()` |
 | `pi-ops-guard.ts` 🌟 | 两个高频错误的 fail-fast：`ctx_execute_file` 指向 cwd 之外、以及 `web_search`（应改用 `codex-search` / `codex-research`） | 配套 `skills/pi-ops/` |
 | `pi-rtk-optimizer/config.json` | `pi-rtk-optimizer` 的本机配置（rewrite 模式、输出压缩、trackSavings…） | 配置，不是扩展代码 |
